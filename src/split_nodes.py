@@ -1,5 +1,5 @@
 from textnode import TextNode, TextType
-
+import re
 
 def split_nodes_delimiter(old_nodes: TextNode, delimiter: str, text_type: TextType) -> list[TextNode]:
     retval = []
@@ -27,4 +27,25 @@ def split_nodes_delimiter(old_nodes: TextNode, delimiter: str, text_type: TextTy
 
     return retval
 
-                              
+
+# The format of a markdown image is:
+#   	![alt text](image.jpg)
+# This function should take a markdown text and return a list of tuples such as
+#  [("alt text", "image.jpg"), ... ]
+def extract_markdown_images(text):
+    matches = re.findall(r'!\[(.*?)\]\((.*?)\)', text)
+
+    return matches
+
+
+# The format of a markdown link is:
+#       [title](https://www.example.com)
+# This function should take a markdown text and return a list of tuples such as
+#  [("title", "https://www.example.com"), ... ]
+def extract_markdown_links(text):
+    
+    matches = re.findall(r'(?<!!)\[(.*?)\]\((.*?)\)', text)
+
+    return matches
+
+
