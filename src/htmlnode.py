@@ -1,6 +1,5 @@
 
-
-
+from functools import reduce
 
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
@@ -46,7 +45,39 @@ class LeafNode(HTMLNode):
                 raise ValueError('img nodes must include an image')
             alt_str = f'alt="{self.props["alt"]}" ' if 'alt' in self.props else ''
             return f'<img src="{self.props["src"]}" {alt_str}/>'
+        if self.tag == 'b':
+            return '<b>' + self.value + '</b>'
+        if self.tag == 'i':
+            return '<i>' + self.value + '</i>'
+        if self.tag == 'span':
+            props_str = self.props_to_html()
+            props_str = ' ' + props_str if len(props_str) > 0 else ''
+            return f'<span{self.props_to_html()}>{self.value}</span>'
+        else:
+            raise NotImplementedError(f'tag: "{self.tag}" not supported')
             
         
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError('all parent nodes must have a tag')
+        if self.children is None or len(self.children) == 0:
+            raise ValueError('all parent nodes must have at least one child node')
+
+        children_to_html = reduce(lambda x,y: x + y.to_html(), self.children, "")
+
+        if self.tag == 'p':
+            return '<p>' + children_to_html + '</p>'
+        if self.tag == 'div':
+            return '<div>' + children_to_html + '</div>'
+        if self.tag == 'span':
+            return '<span>' + children_to_html + '</span>'
+
+
+
 
 
