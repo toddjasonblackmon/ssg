@@ -1,6 +1,21 @@
 from textnode import TextNode, TextType
 import re
 
+def text_to_textnodes(text):
+    node = TextNode(text, TextType.TEXT)
+    nodes = [node]
+    nodes = split_nodes_delimiter(nodes, '`', TextType.CODE)
+    nodes = split_nodes_delimiter(nodes, '**', TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, '__', TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, '_', TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, '*', TextType.ITALIC)
+    nodes = split_nodes_link(nodes)
+    nodes = split_nodes_image(nodes)
+
+    return nodes
+
+
+
 def split_nodes_delimiter(old_nodes: TextNode, delimiter: str, text_type: TextType) -> list[TextNode]:
     retval = []
     for old_node in old_nodes:
@@ -24,6 +39,69 @@ def split_nodes_delimiter(old_nodes: TextNode, delimiter: str, text_type: TextTy
                     retval.append(TextNode(sl, TextType.TEXT))
 
             new_toggle = not new_toggle
+
+    return retval
+
+
+# ![alt text](image.jpg)
+def split_nodes_image(old_nodes):
+    retval = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            retval.append(old_node)
+            continue
+
+        img_props = extract_markdown_images(old_node.text)
+        if len(img_props) == 0:
+            retval.append(old_node)
+            continue
+
+        cur = old_node.text
+        for i in range(len(img_props)):
+            # text = <text><img_props[i]><remain>
+
+            substrs = cur.split(f"![{img_props[i][0]}]({img_props[i][1]})", 1)
+            if len(substrs[0]) > 0:
+                retval.append(TextNode(substrs[0], TextType.TEXT))
+
+            retval.append(TextNode(img_props[i][0], TextType.IMAGE, img_props[i][1]))
+
+            cur = substrs[1]
+
+
+        if len(cur) > 0:
+            retval.append(TextNode(cur, TextType.TEXT))
+
+    return retval
+
+
+# [title](https://www.example.com)
+def split_nodes_link(old_nodes):
+    retval = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            retval.append(old_node)
+            continue
+
+        link_props = extract_markdown_links(old_node.text)
+        if len(link_props) == 0:
+            retval.append(old_node)
+            continue
+
+        cur = old_node.text
+        for i in range(len(link_props)):
+            # text = <text><link_props[i]><remain>
+
+            substrs = cur.split(f"[{link_props[i][0]}]({link_props[i][1]})", 1)
+            if len(substrs[0]) > 0:
+                retval.append(TextNode(substrs[0], TextType.TEXT))
+
+            retval.append(TextNode(link_props[i][0], TextType.LINK, link_props[i][1]))
+
+            cur = substrs[1]
+
+        if len(cur) > 0:
+            retval.append(TextNode(cur, TextType.TEXT))
 
     return retval
 
