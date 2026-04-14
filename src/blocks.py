@@ -1,4 +1,8 @@
 from enum import Enum
+from htmlnode import LeafNode, ParentNode
+from split_nodes import text_to_textnodes
+from convert import text_node_to_html_node
+from textnode import TextNode, TextType
 
 class BlockType(Enum):
     PARAGRAPH = 0
@@ -7,6 +11,35 @@ class BlockType(Enum):
     QUOTE = 3
     UNORDERED_LIST = 4
     ORDERED_LIST = 5
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    html_nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+
+        # Just assume PARAGRAPH for now.
+        if block_type == BlockType.PARAGRAPH:
+            block = " ".join(block.split())
+            text_nodes = text_to_textnodes(block)
+            html_children = list(map(text_node_to_html_node, text_nodes))
+            html_nodes.append(ParentNode('p', html_children))
+        elif block_type == BlockType.CODE:
+            text_node = TextNode(block[4:-3], TextType.CODE)
+            html_node = text_node_to_html_node(text_node)
+            html_nodes.append(ParentNode('pre', [html_node]))
+        else:
+            pass
+
+    # Create parent node
+    top_node = ParentNode('div', html_nodes)
+
+    return top_node
+
+
+
+
 
 
 def markdown_to_blocks(markdown):
@@ -70,15 +103,4 @@ def block_to_block_type(block: str) -> BlockType:
 
 
         return retval
-    
-    # Headings - 1-6 '#' and space
-    # Multiline Code - '```\n' and end with ```
-    # Quote block - Every line must start with >
-    # Unordered list - Every line must start with '- '
-    # Ordered list - Every line must start with a number, '.', then space
-    #                 the number must start at one and increment for each line.
-    # otherwise normal paragraph
 
-
-
-    pass

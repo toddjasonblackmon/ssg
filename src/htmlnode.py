@@ -47,6 +47,8 @@ class LeafNode(HTMLNode):
             return f'<img src="{self.props["src"]}" {alt_str}/>'
         if self.tag == 'b':
             return '<b>' + self.value + '</b>'
+        if self.tag == 'code':
+            return '<code>' + self.value + '</code>'
         if self.tag == 'i':
             return '<i>' + self.value + '</i>'
         if self.tag == 'span':
@@ -76,6 +78,8 @@ class ParentNode(HTMLNode):
             return '<div>' + children_to_html + '</div>'
         if self.tag == 'span':
             return '<span>' + children_to_html + '</span>'
+        if self.tag == 'pre':
+            return '<pre>' + children_to_html + '</pre>'
 
 
 
