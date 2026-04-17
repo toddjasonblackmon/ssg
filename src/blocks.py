@@ -18,19 +18,43 @@ def markdown_to_html_node(markdown):
     html_nodes = []
     for block in blocks:
         block_type = block_to_block_type(block)
+        #print("block_type", block_type)
 
-        # Just assume PARAGRAPH for now.
         if block_type == BlockType.PARAGRAPH:
             block = " ".join(block.split())
             text_nodes = text_to_textnodes(block)
             html_children = list(map(text_node_to_html_node, text_nodes))
             html_nodes.append(ParentNode('p', html_children))
-        elif block_type == BlockType.CODE:
-            text_node = TextNode(block[4:-3], TextType.CODE)
+        elif block_type == BlockType.HEADING:
+            block_strip = block.lstrip('#')
+            heading_num = len(block) - len(block_strip)
+            block_strip = " ".join(block_strip.split())
+            text_nodes = text_to_textnodes(block_strip)
+            html_children = list(map(text_node_to_html_node, text_nodes))
+            html_nodes.append(ParentNode(f'h{heading_num}', html_children))
+        elif block_type == BlockType.QUOTE:
+            block_lines = block.split('\n')
+            stripped_lines = []
+            for line in block_lines:
+                line = line.lstrip('>')
+                stripped_lines.append(line.strip())
+            block_strip = " ".join(stripped_lines)
+            text_nodes = text_to_textnodes(block_strip)
+            html_children = list(map(text_node_to_html_node, text_nodes))
+            html_nodes.append(ParentNode(f'blockquote', html_children))
+        elif block_type == BlockType.UNORDERED_LIST:
+            html_nodes.append(text_to_unordered_textnodes(block))
+        elif block_type == BlockType.ORDERED_LIST:
+            html_nodes.append(text_to_ordered_textnodes(block))
+        else:   # Unimplemented blocks are executed similar to code
+            #elif block_type == BlockType.CODE:
+            if block_type == BlockType.CODE:
+                text_node = TextNode(block[4:-3], TextType.CODE)
+            else:
+                print(f"HACK! {block[:20]}")
+                text_node = TextNode(block, TextType.CODE)
             html_node = text_node_to_html_node(text_node)
             html_nodes.append(ParentNode('pre', [html_node]))
-        else:
-            pass
 
     # Create parent node
     top_node = ParentNode('div', html_nodes)
@@ -38,6 +62,31 @@ def markdown_to_html_node(markdown):
     return top_node
 
 
+# We know the block text represents and unordered list
+# So we need to strip the head of each line and generate
+# an 'li' HTMLnode and finally wrap them all in a parent 'ul' node.
+def text_to_unordered_textnodes(block):
+    unordered_children = []
+    for line in block.split('\n'):
+        # Remove prefix.
+        line = line[2:]
+        text_nodes = text_to_textnodes(line.strip())
+        html_children = list(map(text_node_to_html_node, text_nodes))
+        unordered_children.append(ParentNode('li', html_children))
+    return ParentNode('ul', unordered_children)
+
+# We know the block text represents and unordered list
+# So we need to strip the head of each line and generate
+# an 'li' HTMLnode and finally wrap them all in a parent 'ul' node.
+def text_to_ordered_textnodes(block):
+    ordered_children = []
+    for line in block.split('\n'):
+        # Remove prefix.
+        line = line.lstrip('0123456789.')
+        text_nodes = text_to_textnodes(line.strip())
+        html_children = list(map(text_node_to_html_node, text_nodes))
+        ordered_children.append(ParentNode('li', html_children))
+    return ParentNode('ol', ordered_children)
 
 
 

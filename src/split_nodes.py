@@ -1,6 +1,16 @@
 from textnode import TextNode, TextType
 import re
 
+
+def extract_title(markdown):
+    for line in markdown.split('\n'):
+        line = line.strip()
+        if line.startswith('# '):
+            return line[2:].strip()
+
+    raise Exception('no h1 header found in document')
+
+
 def text_to_textnodes(text):
     node = TextNode(text, TextType.TEXT)
     nodes = [node]

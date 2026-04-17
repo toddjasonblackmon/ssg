@@ -175,6 +175,64 @@ the **same** even with inline stuff
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
+    def test_headingblock(self):
+        md = """
+# This is the main page title
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>This is the main page title</h1></div>",
+        )
+
+    def test_plain_paragraph(self):
+        md = """
+This is a plain paragraph.
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is a plain paragraph.</p></div>",
+        )
+
+    def test_quote_block(self):
+        md = """
+> "The story so far:
+> In the beginning the Universe was created.
+> This has made a lot of people very angry and been widely regarded as a bad move."
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><blockquote>"The story so far: In the beginning the Universe was created. This has made a lot of people very angry and been widely regarded as a bad move."</blockquote></div>',
+        )
+
+
+#     def test_quote_block(self):
+#         md = """
+# “> The story so far:
+# > In the beginning the Universe was created.
+# > This has made a lot of people very angry and been widely regarded as a bad move.
+# > This is a plain paragraph.
+# """
+# 
+#         node = markdown_to_html_node(md)
+#         html = node.to_html()
+#         self.assertEqual(
+#             html,
+#             '<div><quoteblock>"The story so far: In the beginning the Universe was created.  This has made a lot of people very angry and been widely regarded as a bad move."</quoteblock></pre>',
+#         )
+
+
+
+
+
 
 
 

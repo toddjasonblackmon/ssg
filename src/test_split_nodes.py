@@ -3,7 +3,7 @@ import unittest
 from textnode import TextNode, TextType
 from split_nodes import (split_nodes_delimiter, extract_markdown_images, 
                             extract_markdown_links, split_nodes_image,
-                            split_nodes_link, text_to_textnodes)
+                            split_nodes_link, text_to_textnodes, extract_title)
 
 
 class TestTextToTextNodes(unittest.TestCase):
@@ -230,6 +230,8 @@ class TestExtract(unittest.TestCase):
         ]
         self.assertListEqual(expected, matches)
 
+    def test_extract_title(self):
+        self.assertEqual('Hello', extract_title('# Hello'))
 
 #        node = TextNode("This is a text node", TextType.TEXT)
 #        html_node = text_node_to_html_node(node)

@@ -80,6 +80,11 @@ class ParentNode(HTMLNode):
             return '<span>' + children_to_html + '</span>'
         if self.tag == 'pre':
             return '<pre>' + children_to_html + '</pre>'
+        if self.tag in [f"h{x}" for x in range(1,7)]:
+            return f'<{self.tag}>' + children_to_html + f'</{self.tag}>'
+        else:
+            return f'<{self.tag}>' + children_to_html + f'</{self.tag}>'
+
 
 
 

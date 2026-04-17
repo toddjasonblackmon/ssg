@@ -1,8 +1,10 @@
 import os, shutil
+from blocks import markdown_to_html_node
+from split_nodes import extract_title
 
 def log_print(s):
     pass
-    # print(s)
+    print(s)
 
 def copy_directory(source, dest):
 
@@ -28,5 +30,30 @@ def copy_directory(source, dest):
             copy_directory(src_path, dest_path)
         else:
             log_print(f"Ignoring {full_path}: unknown type.")
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}.")
+
+    with open(from_path) as f:
+        markdown = f.read()
+
+    with open(template_path) as f:
+        template = f.read()
+
+    content = markdown_to_html_node(markdown).to_html()
+
+    title = extract_title(markdown)
+
+    html_page = template.replace("{{ Title }}", title).replace("{{ Content }}", content)
+
+    dest_dirname = os.path.dirname(dest_path)
+    if dest_dirname:
+        os.makedirs(dest_dirname, exist_ok=True)
+
+    with open(dest_path, "w") as f:
+        f.write(html_page)
+
+    
 
 
