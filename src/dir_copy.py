@@ -4,7 +4,7 @@ from split_nodes import extract_title
 
 def log_print(s):
     pass
-    print(s)
+#    print(s)
 
 def copy_directory(source, dest):
 
@@ -55,5 +55,32 @@ def generate_page(from_path, template_path, dest_path):
         f.write(html_page)
 
     
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    log_print(f"generate_pages_recursive({dir_path_content}, {template_path}, {dest_dir_path})")
+    if not os.path.exists(dest_dir_path):
+        log_print(f"Error: {dest_dir_path} does not exist")
+        return
+
+    if not os.path.exists(dir_path_content):
+        log_print(f"Nothing to generate from {dir_path_content}")
+        return
+
+    for file_path in os.listdir(dir_path_content):
+        src_path = os.path.join(dir_path_content, file_path)
+        dest_path = os.path.join(dest_dir_path, file_path)
+        if os.path.isfile(src_path):
+            if file_path.endswith(".md"):
+                dest_path = dest_path[:-2] + "html"
+                generate_page(src_path, template_path, dest_path)
+                log_print(f"Generating {src_path} -> {dest_path}")
+            else:
+                log_print(f"Ignoring non-markdown file {src_path}")
+        elif os.path.isdir(src_path):
+            log_print(f"{src_path} is a directory")
+            os.makedirs(dest_path, exist_ok=True)
+            generate_pages_recursive(src_path, template_path, dest_path)
+        else:
+            log_print(f"Ignoring {full_path}: unknown type.")
+
 
 
