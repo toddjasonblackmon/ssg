@@ -32,8 +32,8 @@ def copy_directory(source, dest):
             log_print(f"Ignoring {full_path}: unknown type.")
 
 
-def generate_page(from_path, template_path, dest_path):
-    print(f"Generating page from {from_path} to {dest_path} using {template_path}.")
+def generate_page(from_path, template_path, dest_path, basepath):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path} with {basepath}.")
 
     with open(from_path) as f:
         markdown = f.read()
@@ -46,6 +46,8 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown)
 
     html_page = template.replace("{{ Title }}", title).replace("{{ Content }}", content)
+    html_page  = html_page.replace('href="/', f'href="{basepath}')
+    html_page = html_page.replace('src="/', f'src="{basepath}')
 
     dest_dirname = os.path.dirname(dest_path)
     if dest_dirname:
@@ -55,7 +57,7 @@ def generate_page(from_path, template_path, dest_path):
         f.write(html_page)
 
     
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     log_print(f"generate_pages_recursive({dir_path_content}, {template_path}, {dest_dir_path})")
     if not os.path.exists(dest_dir_path):
         log_print(f"Error: {dest_dir_path} does not exist")
@@ -71,14 +73,14 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         if os.path.isfile(src_path):
             if file_path.endswith(".md"):
                 dest_path = dest_path[:-2] + "html"
-                generate_page(src_path, template_path, dest_path)
+                generate_page(src_path, template_path, dest_path, basepath)
                 log_print(f"Generating {src_path} -> {dest_path}")
             else:
                 log_print(f"Ignoring non-markdown file {src_path}")
         elif os.path.isdir(src_path):
             log_print(f"{src_path} is a directory")
             os.makedirs(dest_path, exist_ok=True)
-            generate_pages_recursive(src_path, template_path, dest_path)
+            generate_pages_recursive(src_path, template_path, dest_path, basepath)
         else:
             log_print(f"Ignoring {full_path}: unknown type.")
 
